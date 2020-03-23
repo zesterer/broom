@@ -50,13 +50,19 @@ let c = heap.insert(Object::List(vec![a, b]));
 // Change one of the numbers - this is safe, even if the object is self-referential!
 heap.mutate(a, |a| *a = Object::Num(256.0));
 
+// Create another number object
+let d = heap.insert_temp(Object::Num(0.0));
+
 // Clean up unused heap objects
 heap.clean();
 
 // a, b and c are all kept alive because c is rooted and a and b are its children
-assert!(heap.contains(a), true);
-assert!(heap.contains(b), true);
-assert!(heap.contains(c), true);
+assert!(heap.contains(a));
+assert!(heap.contains(b));
+assert!(heap.contains(c));
+
+// Because `d` was temporary and unused, it did not survive the heap clean
+assert!(!heap.contains(d));
 ```
 
 ## Who this crate is for
