@@ -16,7 +16,7 @@ use super::*;
 /// }
 ///
 /// impl Trace<Self> for Object {
-///     fn trace(&self, tracer: &mut Tracer<Self>) {
+///     unsafe fn trace(&self, tracer: &mut Tracer<Self>) {
 ///         match self {
 ///             Object::Num(_) => {},
 ///             Object::List(objects) => objects.trace(tracer),
@@ -30,8 +30,12 @@ pub trait Trace<T: Trace<T>> {
     /// Note that although failing to trace all children is not undefined behaviour on its own, it
     /// will mean that objects may be accidentally garbage-collected, and hence that the
     /// `_unchecked` methods in this crate will produce undefined behaviour when used to access
-    /// those objects.
-    fn trace(&self, tracer: &mut Tracer<T>);
+    /// those objects. This means that if those objects are traced again, undefined behaviour will.
+    /// This is why this function is marked as `unsafe`.
+    ///
+    /// In addition, you must ensure that this function does not result in the tracing of objects
+    /// associated with other heaps: to do so is undefined behaviour.
+    unsafe fn trace(&self, tracer: &mut Tracer<T>);
 }
 
 /// A type used to perform a heap trace. Largely an implementation detail: To implement heap
@@ -48,19 +52,19 @@ impl<'a, T: Trace<T>> Tracer<'a, T> {
             .or_insert(self.new_sweep - 1);
         if *sweep != self.new_sweep {
             *sweep = self.new_sweep;
-            unsafe { &*handle.ptr }.trace(self);
+            unsafe { (&*handle.ptr).trace(self); }
         }
     }
 }
 
 impl<O: Trace<O>> Trace<O> for Handle<O> {
-    fn trace(&self, tracer: &mut Tracer<O>) {
+    unsafe fn trace(&self, tracer: &mut Tracer<O>) {
         tracer.mark(*self);
     }
 }
 
 impl<O: Trace<O>> Trace<O> for Rooted<O> {
-    fn trace(&self, tracer: &mut Tracer<O>) {
+    unsafe fn trace(&self, tracer: &mut Tracer<O>) {
         self.handle().trace(tracer);
     }
 }
@@ -73,31 +77,31 @@ use std::collections::{
 };
 
 impl<O: Trace<O>, T: Trace<O>> Trace<O> for [T] {
-    fn trace(&self, tracer: &mut Tracer<O>) {
+    unsafe fn trace(&self, tracer: &mut Tracer<O>) {
         self.iter().for_each(|object| object.trace(tracer));
     }
 }
 
 impl<O: Trace<O>, T: Trace<O>> Trace<O> for VecDeque<T> {
-    fn trace(&self, tracer: &mut Tracer<O>) {
+    unsafe fn trace(&self, tracer: &mut Tracer<O>) {
         self.iter().for_each(|object| object.trace(tracer));
     }
 }
 
 impl<O: Trace<O>, T: Trace<O>> Trace<O> for LinkedList<T> {
-    fn trace(&self, tracer: &mut Tracer<O>) {
+    unsafe fn trace(&self, tracer: &mut Tracer<O>) {
         self.iter().for_each(|object| object.trace(tracer));
     }
 }
 
 impl<O: Trace<O>, K, V: Trace<O>> Trace<O> for StdHashMap<K, V> {
-    fn trace(&self, tracer: &mut Tracer<O>) {
+    unsafe fn trace(&self, tracer: &mut Tracer<O>) {
         self.values().for_each(|object| object.trace(tracer));
     }
 }
 
 impl<O: Trace<O>, T: Trace<O>> Trace<O> for HashSet<T> {
-    fn trace(&self, tracer: &mut Tracer<O>) {
+    unsafe fn trace(&self, tracer: &mut Tracer<O>) {
         self.iter().for_each(|object| object.trace(tracer));
     }
 }

@@ -12,7 +12,7 @@ pub enum Value {
 }
 
 impl Trace<Self> for Value {
-    fn trace(&self, tracer: &mut Tracer<Self>) {
+    unsafe fn trace(&self, tracer: &mut Tracer<Self>) {
         if let Value::Two(a, b) = self {
             a.trace(tracer);
             b.trace(tracer);

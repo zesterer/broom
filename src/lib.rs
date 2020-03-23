@@ -15,7 +15,7 @@
 //!
 //! // Tell the garbage collector how to explore a graph of this object
 //! impl Trace<Self> for Object {
-//!     fn trace(&self, tracer: &mut Tracer<Self>) {
+//!     unsafe fn trace(&self, tracer: &mut Tracer<Self>) {
 //!         match self {
 //!             Object::Num(_) => {},
 //!             Object::List(objects) => objects.trace(tracer),
@@ -213,7 +213,7 @@ impl<T: Trace<T>> Heap<T> {
             .retain(|ptr, rc| {
                 if Rc::strong_count(rc) > 1 {
                     tracer.mark(Handle { ptr: *ptr });
-                    unsafe { &**ptr }.trace(&mut tracer);
+                    unsafe { (&**ptr).trace(&mut tracer); }
                     true
                 } else {
                     false
@@ -225,7 +225,7 @@ impl<T: Trace<T>> Heap<T> {
             .filter(|handle| objects.contains(&handle.ptr))
             .for_each(|handle| {
                 tracer.mark(handle);
-                unsafe { &*handle.ptr }.trace(&mut tracer);
+                unsafe { (&*handle.ptr).trace(&mut tracer); }
             });
 
         // Sweep
@@ -384,7 +384,7 @@ mod tests {
     }
 
     impl<'a> Trace<Self> for Value<'a> {
-        fn trace(&self, tracer: &mut Tracer<Self>) {
+        unsafe fn trace(&self, tracer: &mut Tracer<Self>) {
             match self {
                 Value::Base(_) => {},
                 Value::Refs(_, a, b) => {

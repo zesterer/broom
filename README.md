@@ -29,7 +29,7 @@ pub enum Object {
 
 // Tell the garbage collector how to explore a graph of this object
 impl Trace<Self> for Object {
-    fn trace(&self, tracer: &mut Tracer<Self>) {
+    unsafe fn trace(&self, tracer: &mut Tracer<Self>) {
         match self {
             Object::Num(_) => {},
             Object::List(objects) => objects.trace(tracer),
