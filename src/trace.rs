@@ -3,7 +3,7 @@ use super::*;
 /// A trait used to tell the garbage collector how it may explore an object graph composed of
 /// values of type `T`.
 ///
-/// To implement this, simple call `foo.trace(tracer)` on all traceable children
+/// To implement this, simply call `foo.trace(tracer)` on all traceable children
 /// of the type. Note that this trait has default implementations for a variety of common types.
 ///
 /// # Example
@@ -24,7 +24,7 @@ use super::*;
 ///     }
 /// }
 /// ```
-pub trait Trace<T: Trace<T>>: Sized {
+pub trait Trace<T: Trace<T>> {
     fn trace(&self, tracer: &mut Tracer<T>);
 }
 
@@ -66,7 +66,7 @@ use std::collections::{
     LinkedList,
 };
 
-impl<O: Trace<O>, T: Trace<O>> Trace<O> for Vec<T> {
+impl<O: Trace<O>, T: Trace<O>> Trace<O> for [T] {
     fn trace(&self, tracer: &mut Tracer<O>) {
         self.iter().for_each(|object| object.trace(tracer));
     }

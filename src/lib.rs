@@ -45,7 +45,7 @@
 //! assert!(heap.contains(c), true);
 //! ```
 
-mod trace;
+pub mod trace;
 
 use std::rc::Rc;
 use hashbrown::{HashMap, HashSet};
