@@ -4,7 +4,7 @@ An ergonomic tracing garbage collector that supports mark 'n sweep garbage colle
 
 [![Cargo](https://img.shields.io/crates/v/broom.svg)](
 https://crates.io/crates/broom)
-[![Documentation](https://docs.rs/flume/badge.svg)](
+[![Documentation](https://docs.rs/broom/badge.svg)](
 https://docs.rs/broom)
 [![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue.svg)](
 https://github.com/zesterer/broom)
