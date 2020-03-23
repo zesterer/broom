@@ -1,0 +1,13 @@
+[package]
+name = "broom"
+version = "0.1.0"
+description = "A safe, simple tracing garbage collector"
+authors = ["Joshua Barretto <joshua.s.barretto@gmail.com>"]
+edition = "2018"
+license = "MIT"
+
+[dependencies]
+hashbrown = "0.7"
+
+[dev-dependencies]
+rand = "0.7"
