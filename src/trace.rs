@@ -30,8 +30,8 @@ pub trait Trace<T: Trace<T>> {
     /// Note that although failing to trace all children is not undefined behaviour on its own, it
     /// will mean that objects may be accidentally garbage-collected, and hence that the
     /// `_unchecked` methods in this crate will produce undefined behaviour when used to access
-    /// those objects. This means that if those objects are traced again, undefined behaviour will.
-    /// This is why this function is marked as `unsafe`.
+    /// those objects. This means that if those objects are traced again, undefined behaviour will
+    /// occur. This is why this function is marked as `unsafe`.
     ///
     /// In addition, you must ensure that this function does not result in the tracing of objects
     /// associated with other heaps: to do so is undefined behaviour.

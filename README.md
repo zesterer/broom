@@ -68,7 +68,7 @@ assert!(!heap.contains(d));
 ## Who this crate is for
 
 - People writing dynamically-typed languages in Rust that want a simple, reliable garbage collector
-- People that want to have complex graph data structure with mutation and cycles and don't want memory leaks
+- People that want to have complex graph data structures with mutation and cycles but who don't want memory leaks
 
 ## Who this crate is not for
 
@@ -82,3 +82,11 @@ There are a few things I want to do with `broom` if I get the time:
 - Partial cleans to prevent garbage collection lag spikes
 
 If you're interested in working on any of these things, feel free to open a pull request!
+
+## License
+
+Broom is licensed under either of:
+
+- Apache License 2.0, (http://www.apache.org/licenses/LICENSE-2.0)
+
+- MIT license (http://opensource.org/licenses/MIT)
