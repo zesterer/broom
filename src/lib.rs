@@ -72,6 +72,9 @@ pub mod prelude {
 ///
 /// [`Heap`] is the centre of `broom`'s universe. It's the singleton through with manipulation of
 /// objects occurs. It can be used to create, access, mutate and garbage-collect objects.
+///
+/// Note that heaps, and the objects associated with them, are *not* compatible: this means that
+/// you may not create trace routes (see [`Trace`]) that cross the boundary between different heaps.
 pub struct Heap<T> {
     last_sweep: usize,
     object_sweeps: HashMap<*mut T, usize>,
