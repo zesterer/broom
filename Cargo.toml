@@ -1,6 +1,6 @@
 [package]
 name = "broom"
-version = "0.1.0"
+version = "0.1.1"
 description = "An ergonomic tracing garbage collector that supports mark 'n sweep garbage collection"
 categories = ["data-structures", "memory-management", "algorithms"]
 keywords = ["garbage", "collection", "gc", "mark", "sweep"]
