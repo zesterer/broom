@@ -1,3 +1,5 @@
+mod trace;
+
 use std::rc::Rc;
 use hashbrown::{HashMap, HashSet};
 
@@ -6,36 +8,11 @@ pub mod prelude {
         Heap,
         Handle,
         Rooted,
+        trace::{Trace, Tracer},
     };
 }
 
-pub mod trace {
-    use super::*;
-
-    pub trait Trace: Sized {
-        fn trace(&self, tracer: &mut Tracer<Self>);
-    }
-
-    pub struct Tracer<'a, T: Trace> {
-        pub(crate) new_sweep: usize,
-        pub(crate) item_sweeps: &'a mut HashMap<*mut T, usize>,
-        pub(crate) items: &'a HashSet<*mut T>,
-    }
-}
-
 use trace::*;
-
-impl<'a, T: Trace> Tracer<'a, T> {
-    pub fn mark(&mut self, handle: Handle<T>) {
-        let sweep = self.item_sweeps
-            .entry(handle.ptr)
-            .or_insert(self.new_sweep - 1);
-        if *sweep != self.new_sweep {
-            *sweep = self.new_sweep;
-            unsafe { &*handle.ptr }.trace(self);
-        }
-    }
-}
 
 pub struct Heap<T> {
     last_sweep: usize,
@@ -55,7 +32,7 @@ impl<T> Default for Heap<T> {
     }
 }
 
-impl<T: Trace> Heap<T> {
+impl<T: Trace<T>> Heap<T> {
     /// Adds a new item that will be cleared upon the next garbage collection, if not attached
     /// to the item tree.
     pub fn insert_temp(&mut self, item: T) -> Handle<T> {
@@ -146,7 +123,6 @@ impl<T: Trace> Heap<T> {
         let mut tracer = Tracer {
             new_sweep,
             item_sweeps: &mut self.item_sweeps,
-            items: &self.items,
         };
 
         // Mark
@@ -267,7 +243,7 @@ mod tests {
         Refs(Handle<Value>, Handle<Value>),
     }
 
-    impl Trace for Value {
+    impl Trace<Self> for Value {
         fn trace(&self, tracer: &mut Tracer<Self>) {
             match self {
                 Value::Base => {},

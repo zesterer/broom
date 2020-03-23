@@ -4,14 +4,14 @@ extern crate test;
 
 use test::{Bencher, black_box};
 use rand::prelude::*;
-use broom::{prelude::*, trace::*};
+use broom::prelude::*;
 
 pub enum Value {
     Root,
     Two(Handle<Value>, Handle<Value>),
 }
 
-impl Trace for Value {
+impl Trace<Self> for Value {
     fn trace(&self, tracer: &mut Tracer<Self>) {
         if let Value::Two(a, b) = self {
             tracer.mark(*a);

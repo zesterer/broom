@@ -24,9 +24,7 @@ pub enum Object {
 impl Trace for Object {
     fn trace(&self, tracer: &mut Tracer<Self>) {
         match self {
-            Value::List(items) => items
-                .iter()
-                .for_each(|item| tracer.mark(*item)),
+            Value::List(items) => items.trace(tracer),
             _ => {},
         }
     }
