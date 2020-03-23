@@ -14,8 +14,8 @@ pub enum Value {
 impl Trace<Self> for Value {
     fn trace(&self, tracer: &mut Tracer<Self>) {
         if let Value::Two(a, b) = self {
-            tracer.mark(*a);
-            tracer.mark(*b);
+            a.trace(tracer);
+            b.trace(tracer);
         }
     }
 }

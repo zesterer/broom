@@ -36,7 +36,7 @@ pub struct Tracer<'a, T: Trace<T>> {
 }
 
 impl<'a, T: Trace<T>> Tracer<'a, T> {
-    pub fn mark(&mut self, handle: Handle<T>) {
+    pub(crate) fn mark(&mut self, handle: Handle<T>) {
         let sweep = self.object_sweeps
             .entry(handle.ptr)
             .or_insert(self.new_sweep - 1);

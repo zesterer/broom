@@ -19,7 +19,7 @@ https://github.com/zesterer/broom)
 ## Example
 
 ```rust
-use broom::{Handle, Trace, Tracer, Heap};
+use broom::prelude::*;
 
 // The type you want the heap to contain
 pub enum Object {
