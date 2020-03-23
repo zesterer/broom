@@ -25,6 +25,12 @@ use super::*;
 /// }
 /// ```
 pub trait Trace<T: Trace<T>> {
+    /// Trace *all* child objects of this type.
+    ///
+    /// Note that although failing to trace all children is not undefined behaviour on its own, it
+    /// will mean that objects may be accidentally garbage-collected, and hence that the
+    /// `_unchecked` methods in this crate will produce undefined behaviour when used to access
+    /// those objects.
     fn trace(&self, tracer: &mut Tracer<T>);
 }
 
@@ -90,7 +96,7 @@ impl<O: Trace<O>, K, V: Trace<O>> Trace<O> for StdHashMap<K, V> {
     }
 }
 
-impl<O: Trace<O>, V: Trace<O>> Trace<O> for HashSet<V> {
+impl<O: Trace<O>, T: Trace<O>> Trace<O> for HashSet<T> {
     fn trace(&self, tracer: &mut Tracer<O>) {
         self.iter().for_each(|object| object.trace(tracer));
     }
