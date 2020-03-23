@@ -1,17 +1,43 @@
 use super::*;
 
+/// A trait used to tell the garbage collector how it may explore an object graph composed of
+/// values of type `T`.
+///
+/// To implement this, simple call `foo.trace(tracer)` on all traceable children
+/// of the type. Note that this trait has default implementations for a variety of common types.
+///
+/// # Example
+/// ```
+/// use broom::prelude::*;
+///
+/// pub enum Object {
+///     Num(f64),
+///     List(Vec<Handle<Self>>),
+/// }
+///
+/// impl Trace<Self> for Object {
+///     fn trace(&self, tracer: &mut Tracer<Self>) {
+///         match self {
+///             Object::Num(_) => {},
+///             Object::List(objects) => objects.trace(tracer),
+///         }
+///     }
+/// }
+/// ```
 pub trait Trace<T: Trace<T>>: Sized {
     fn trace(&self, tracer: &mut Tracer<T>);
 }
 
+/// A type used to perform a heap trace. Largely an implementation detail: To implement heap
+/// tracing, look at the [`Trace`] trait instead.
 pub struct Tracer<'a, T: Trace<T>> {
     pub(crate) new_sweep: usize,
-    pub(crate) item_sweeps: &'a mut HashMap<*mut T, usize>,
+    pub(crate) object_sweeps: &'a mut HashMap<*mut T, usize>,
 }
 
 impl<'a, T: Trace<T>> Tracer<'a, T> {
     pub fn mark(&mut self, handle: Handle<T>) {
-        let sweep = self.item_sweeps
+        let sweep = self.object_sweeps
             .entry(handle.ptr)
             .or_insert(self.new_sweep - 1);
         if *sweep != self.new_sweep {
@@ -42,30 +68,30 @@ use std::collections::{
 
 impl<O: Trace<O>, T: Trace<O>> Trace<O> for Vec<T> {
     fn trace(&self, tracer: &mut Tracer<O>) {
-        self.iter().for_each(|item| item.trace(tracer));
+        self.iter().for_each(|object| object.trace(tracer));
     }
 }
 
 impl<O: Trace<O>, T: Trace<O>> Trace<O> for VecDeque<T> {
     fn trace(&self, tracer: &mut Tracer<O>) {
-        self.iter().for_each(|item| item.trace(tracer));
+        self.iter().for_each(|object| object.trace(tracer));
     }
 }
 
 impl<O: Trace<O>, T: Trace<O>> Trace<O> for LinkedList<T> {
     fn trace(&self, tracer: &mut Tracer<O>) {
-        self.iter().for_each(|item| item.trace(tracer));
+        self.iter().for_each(|object| object.trace(tracer));
     }
 }
 
 impl<O: Trace<O>, K, V: Trace<O>> Trace<O> for StdHashMap<K, V> {
     fn trace(&self, tracer: &mut Tracer<O>) {
-        self.values().for_each(|item| item.trace(tracer));
+        self.values().for_each(|object| object.trace(tracer));
     }
 }
 
 impl<O: Trace<O>, V: Trace<O>> Trace<O> for HashSet<V> {
     fn trace(&self, tracer: &mut Tracer<O>) {
-        self.iter().for_each(|item| item.trace(tracer));
+        self.iter().for_each(|object| object.trace(tracer));
     }
 }

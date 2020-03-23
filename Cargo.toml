@@ -1,10 +1,14 @@
 [package]
 name = "broom"
 version = "0.1.0"
-description = "A safe, simple tracing garbage collector"
+description = "An ergonomic tracing garbage collector that supports mark 'n sweep garbage collection"
+categories = ["data-structures", "memory-management", "algorithms"]
+keywords = ["garbage", "collection", "reference", "gc", "mark", "sweep"]
+repository = "https://github.com/zesterer/broom"
 authors = ["Joshua Barretto <joshua.s.barretto@gmail.com>"]
 edition = "2018"
-license = "MIT"
+license = "Apache-2.0/MIT"
+readme = "README.md"
 
 [dependencies]
 hashbrown = "0.7"
