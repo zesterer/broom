@@ -20,7 +20,7 @@ pub enum Object {
     List(Vec<Handle<Self>>),
 }
 
-// Allow the garbage collector to explore the object tree
+// Allow the garbage collector to explore the object graph
 impl Trace for Object {
     fn trace(&self, tracer: &mut Tracer<Self>) {
         match self {
@@ -35,9 +35,12 @@ impl Trace for Object {
 // Create a new heap
 let mut heap = Heap::default();
 
-// Create a list of two numbers on the heap
-let a = heap.insert(Object::Num(42.0));
-let b = heap.insert(Object::Num(1337.0));
+// Creating temporary objects is cheaper than creating rooted objects.
+// However, temporary objects are not saved from cleanups.
+let a = heap.insert_temp(Object::Num(42.0));
+let b = heap.insert_temp(Object::Num(1337.0));
+
+// Turn the numbers into a rooted list
 let c = heap.insert(Object::List(vec![
     a.handle(),
     b.handle(),
@@ -45,4 +48,21 @@ let c = heap.insert(Object::List(vec![
 
 // Change one of the numbers
 heap.mutate(a, |a| *a = Object::Num(256.0));
+
+// Clean up unused heap objects
+heap.clean();
+
+// a, b and c are all kept alive because c is rooted and a and b are its children
+assert!(heap.contains(a), true);
+assert!(heap.contains(b), true);
+assert!(heap.contains(c), true);
 ```
+
+## Who this crate is for
+
+- People writing dynamically-typed languages in Rust that want a simple, reliable garbage collector
+- People that want to have complex graph data structure with cycles and don't want memory leaks
+
+## Who this crate is not for
+
+- People that want garbage collection when writing ordinary Rust code
