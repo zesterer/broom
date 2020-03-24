@@ -48,7 +48,7 @@ let b = heap.insert_temp(Object::Num(1337.0));
 let c = heap.insert(Object::List(vec![a, b]));
 
 // Change one of the numbers - this is safe, even if the object is self-referential!
-heap.mutate(a, |a| *a = Object::Num(256.0));
+*heap.get_mut(a).unwrap() = Object::Num(256.0);
 
 // Create another number object
 let d = heap.insert_temp(Object::Num(0.0));
