@@ -29,7 +29,7 @@ pub enum Object {
 
 // Tell the garbage collector how to explore a graph of this object
 impl Trace<Self> for Object {
-    unsafe fn trace(&self, tracer: &mut Tracer<Self>) {
+    fn trace(&self, tracer: &mut Tracer<Self>) {
         match self {
             Object::Num(_) => {},
             Object::List(objects) => objects.trace(tracer),
@@ -73,6 +73,12 @@ assert!(!heap.contains(d));
 ## Who this crate is not for
 
 - People that want garbage collection when writing ordinary Rust code
+
+## Performance
+
+This crate makes no specific promises about performance. It is designed with a 'best attempt' approach;
+this means that it should be fast enough for most purposes but is probably not competitive with garbage
+collectors that have had years of development work ploughed into them.
 
 ## TODO
 
