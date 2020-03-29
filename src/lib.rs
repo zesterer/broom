@@ -53,6 +53,7 @@
 //! ```
 
 pub mod trace;
+pub mod tag;
 
 use std::{
     cmp::{PartialEq, Eq},
