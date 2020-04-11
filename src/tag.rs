@@ -6,7 +6,7 @@ use super::Handle;
 /// data into its internal representation.
 ///
 /// A tagged handle can be decoded into a [`Tag`] to distinguish objects on the heap from stack values.
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct TaggedHandle<T> {
     handle: Handle<T>,
 }
@@ -94,7 +94,12 @@ impl<T> TaggedHandle<T> {
     }
 }
 
-impl<T: Clone> Copy for TaggedHandle<T> {}
+impl<T> Clone for TaggedHandle<T> {
+    fn clone(&self) -> Self {
+        TaggedHandle { handle: self.handle }
+    }
+}
+impl<T> Copy for TaggedHandle<T> {}
 
 impl<T> PartialEq<Self> for TaggedHandle<T> {
     fn eq(&self, other: &Self) -> bool {
