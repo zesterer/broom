@@ -53,6 +53,7 @@
 //! ```
 
 pub mod trace;
+/// Types for NaN-tagged pointers.
 pub mod tag;
 
 use std::{
