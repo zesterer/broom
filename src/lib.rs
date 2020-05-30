@@ -54,21 +54,19 @@
 
 pub mod trace;
 
-use std::{
-    cmp::{PartialEq, Eq},
-    rc::Rc,
-    hash::{Hash, Hasher},
-};
-use hashbrown::{HashMap, HashSet};
 use crate::trace::*;
+use hashbrown::{HashMap, HashSet};
+use std::{
+    cmp::{Eq, PartialEq},
+    hash::{Hash, Hasher},
+    rc::Rc,
+};
 
 /// Common items that you'll probably need often.
 pub mod prelude {
     pub use super::{
-        Heap,
-        Handle,
-        Rooted,
         trace::{Trace, Tracer},
+        Handle, Heap, Rooted,
     };
 }
 
@@ -132,10 +130,7 @@ impl<T: Trace<T>> Heap<T> {
         let rc = Rc::new(());
         self.rooted.insert(handle, rc.clone());
 
-        Rooted {
-            rc,
-            handle,
-        }
+        Rooted { rc, handle }
     }
 
     /// Upgrade a handle (that will be cleared by the garbage collector) into a rooted handle (that
@@ -145,7 +140,8 @@ impl<T: Trace<T>> Heap<T> {
         debug_assert!(self.contains(handle));
 
         Rooted {
-            rc: self.rooted
+            rc: self
+                .rooted
                 .entry(*handle)
                 .or_insert_with(|| Rc::new(()))
                 .clone(),
@@ -212,7 +208,7 @@ impl<T: Trace<T>> Heap<T> {
     /// This function is useful in circumstances in which you wish to keep certain items alive over
     /// a garbage collection without the addition cost of a [`Rooted`] handle. An example of this
     /// might be stack items in a garbage-collected language
-    pub fn clean_excluding(&mut self, excluding: impl IntoIterator<Item=Handle<T>>) {
+    pub fn clean_excluding(&mut self, excluding: impl IntoIterator<Item = Handle<T>>) {
         let new_sweep = self.last_sweep + 1;
         let mut tracer = Tracer {
             new_sweep,
@@ -221,41 +217,43 @@ impl<T: Trace<T>> Heap<T> {
         };
 
         // Mark
-        self.rooted
-            .retain(|handle, rc| {
-                if Rc::strong_count(rc) > 1 {
-                    tracer.mark(*handle);
-                    unsafe { (&*handle.ptr).trace(&mut tracer); }
-                    true
-                } else {
-                    false
+        self.rooted.retain(|handle, rc| {
+            if Rc::strong_count(rc) > 1 {
+                tracer.mark(*handle);
+                unsafe {
+                    (&*handle.ptr).trace(&mut tracer);
                 }
-            });
+                true
+            } else {
+                false
+            }
+        });
         let objects = &self.objects;
         excluding
             .into_iter()
             .filter(|handle| objects.contains(&handle))
             .for_each(|handle| {
                 tracer.mark(handle);
-                unsafe { (&*handle.ptr).trace(&mut tracer); }
+                unsafe {
+                    (&*handle.ptr).trace(&mut tracer);
+                }
             });
 
         // Sweep
         let object_sweeps = &mut self.object_sweeps;
-        self.objects
-            .retain(|handle| {
-                if object_sweeps
-                    .get(handle)
-                    .map(|sweep| *sweep == new_sweep)
-                    .unwrap_or(false)
-                {
-                    true
-                } else {
-                    object_sweeps.remove(handle);
-                    drop(unsafe { Box::from_raw(handle.ptr) });
-                    false
-                }
-            });
+        self.objects.retain(|handle| {
+            if object_sweeps
+                .get(handle)
+                .map(|sweep| *sweep == new_sweep)
+                .unwrap_or(false)
+            {
+                true
+            } else {
+                object_sweeps.remove(handle);
+                drop(unsafe { Box::from_raw(handle.ptr) });
+                false
+            }
+        });
 
         self.last_sweep = new_sweep;
     }
@@ -332,7 +330,10 @@ impl<T> Handle<T> {
 impl<T> Copy for Handle<T> {}
 impl<T> Clone for Handle<T> {
     fn clone(&self) -> Self {
-        Self { gen: self.gen, ptr: self.ptr }
+        Self {
+            gen: self.gen,
+            ptr: self.ptr,
+        }
     }
 }
 
@@ -413,11 +414,11 @@ mod tests {
     impl<'a> Trace<Self> for Value<'a> {
         fn trace(&self, tracer: &mut Tracer<Self>) {
             match self {
-                Value::Base(_) => {},
+                Value::Base(_) => {}
                 Value::Refs(_, a, b) => {
                     a.trace(tracer);
                     b.trace(tracer);
-                },
+                }
             }
         }
     }
@@ -425,8 +426,9 @@ mod tests {
     impl<'a> Drop for Value<'a> {
         fn drop(&mut self) {
             match self {
-                Value::Base(count) | Value::Refs(count, _, _) =>
-                    count.fetch_sub(1, Ordering::Relaxed),
+                Value::Base(count) | Value::Refs(count, _, _) => {
+                    count.fetch_sub(1, Ordering::Relaxed)
+                }
             };
         }
     }
