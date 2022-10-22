@@ -52,6 +52,8 @@
 //!
 //! ```
 
+#![feature(cell_update)]
+
 pub mod trace;
 
 use std::{
@@ -200,10 +202,10 @@ impl<T: Trace<T>> Heap<T> {
     ///
     /// If either invariant is not upheld, calling this function results in undefined
     /// behaviour. Provided they are upheld, this function provides zero-cost access.
-    pub fn get_mut_unchecked(&mut self, handle: impl AsRef<Handle<T>>) -> &mut T {
+    pub unsafe fn get_mut_unchecked(&mut self, handle: impl AsRef<Handle<T>>) -> &mut T {
         let handle = handle.as_ref();
         debug_assert!(self.contains(handle));
-        unsafe { &mut *handle.ptr }
+        &mut *handle.ptr
     }
 
     /// Clean orphaned objects from the heap, excluding those that can be reached from the given

@@ -1,6 +1,6 @@
 [package]
 name = "broom"
-version = "0.3.0"
+version = "0.3.1"
 description = "An ergonomic tracing garbage collector that supports mark 'n sweep garbage collection"
 categories = ["data-structures", "memory-management", "algorithms"]
 keywords = ["garbage", "collection", "gc", "mark", "sweep"]
@@ -12,6 +12,7 @@ readme = "README.md"
 
 [dependencies]
 hashbrown = "0.7"
+slotmap = "1.0"
 
 [dev-dependencies]
 rand = "0.7"
