@@ -52,8 +52,6 @@
 //!
 //! ```
 
-#![feature(cell_update)]
-
 pub mod trace;
 
 use std::{
