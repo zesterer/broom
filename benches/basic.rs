@@ -2,9 +2,9 @@
 
 extern crate test;
 
-use test::{Bencher, black_box};
-use rand::prelude::*;
 use broom::prelude::*;
+use rand::prelude::*;
+use test::{black_box, Bencher};
 
 pub enum Value {
     Root,

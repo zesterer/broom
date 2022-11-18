@@ -47,12 +47,15 @@ pub struct Tracer<'a, T: Trace<T>> {
 
 impl<'a, T: Trace<T>> Tracer<'a, T> {
     pub(crate) fn mark(&mut self, handle: Handle<T>) {
-        let sweep = self.object_sweeps
+        let sweep = self
+            .object_sweeps
             .entry(handle)
             .or_insert(self.new_sweep - 1);
         if *sweep != self.new_sweep && self.objects.contains(&handle) {
             *sweep = self.new_sweep;
-            unsafe { (&*handle.ptr).trace(self); }
+            unsafe {
+                (&*handle.ptr).trace(self);
+            }
         }
     }
 }
@@ -70,11 +73,7 @@ impl<O: Trace<O>> Trace<O> for Rooted<O> {
 }
 
 // Impl on standard things
-use std::collections::{
-    HashMap as StdHashMap,
-    VecDeque,
-    LinkedList,
-};
+use std::collections::{HashMap as StdHashMap, LinkedList, VecDeque};
 
 impl<O: Trace<O>, T: Trace<O>> Trace<O> for [T] {
     fn trace(&self, tracer: &mut Tracer<O>) {
